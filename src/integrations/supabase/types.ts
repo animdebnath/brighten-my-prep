@@ -14,7 +14,144 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      attempts: {
+        Row: {
+          confidence: number
+          correct_answer: string
+          created_at: string
+          difficulty: string
+          explanation: string | null
+          id: string
+          is_correct: boolean
+          options: Json | null
+          question: string
+          response_ms: number
+          subject: string
+          topic: string
+          user_answer: string | null
+          user_id: string
+        }
+        Insert: {
+          confidence?: number
+          correct_answer: string
+          created_at?: string
+          difficulty: string
+          explanation?: string | null
+          id?: string
+          is_correct?: boolean
+          options?: Json | null
+          question: string
+          response_ms?: number
+          subject: string
+          topic: string
+          user_answer?: string | null
+          user_id: string
+        }
+        Update: {
+          confidence?: number
+          correct_answer?: string
+          created_at?: string
+          difficulty?: string
+          explanation?: string | null
+          id?: string
+          is_correct?: boolean
+          options?: Json | null
+          question?: string
+          response_ms?: number
+          subject?: string
+          topic?: string
+          user_answer?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      chat_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string
+          id: string
+          last_active: string | null
+          streak: number
+          updated_at: string
+          xp: number
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string
+          id: string
+          last_active?: string | null
+          streak?: number
+          updated_at?: string
+          xp?: number
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string
+          id?: string
+          last_active?: string | null
+          streak?: number
+          updated_at?: string
+          xp?: number
+        }
+        Relationships: []
+      }
+      sessions: {
+        Row: {
+          correct: number
+          created_at: string
+          id: string
+          score: number
+          subject: string
+          total: number
+          user_id: string
+        }
+        Insert: {
+          correct?: number
+          created_at?: string
+          id?: string
+          score?: number
+          subject: string
+          total?: number
+          user_id: string
+        }
+        Update: {
+          correct?: number
+          created_at?: string
+          id?: string
+          score?: number
+          subject?: string
+          total?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
