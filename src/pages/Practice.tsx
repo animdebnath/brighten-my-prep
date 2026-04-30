@@ -116,14 +116,34 @@ export default function Practice() {
       <div className="glass rounded-2xl p-4 grid sm:grid-cols-3 gap-3">
         <div>
           <Label className="text-xs">Subject</Label>
-          <select value={subject} onChange={e => setSubject(e.target.value)}
+          <select
+            value={subject}
+            onChange={e => {
+              const next = e.target.value;
+              setSubject(next);
+              recentTopics.current = [];
+              // defer to next tick so state is applied
+              setTimeout(() => fetchQuestion(), 0);
+            }}
             className="w-full mt-1 h-10 rounded-xl bg-input border border-border px-3 text-sm">
             {SUBJECTS.map(s => <option key={s}>{s}</option>)}
           </select>
         </div>
         <div>
-          <Label className="text-xs">Topic</Label>
-          <Input value={topic} onChange={e => setTopic(e.target.value)} className="mt-1" placeholder="e.g. Sorting algorithms" />
+          <Label className="text-xs">Topic <span className="text-muted-foreground">(press Enter)</span></Label>
+          <Input
+            value={topic}
+            onChange={e => setTopic(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === "Enter" && topic.trim()) {
+                e.preventDefault();
+                recentTopics.current = [];
+                fetchQuestion();
+              }
+            }}
+            className="mt-1"
+            placeholder="e.g. Sorting algorithms"
+          />
         </div>
         <div>
           <Label className="text-xs">Confidence: {confidence[0]}/5</Label>
