@@ -25,8 +25,6 @@ export default function Dashboard() {
     const ch = supabase.channel("dash-realtime")
       .on("postgres_changes", { event: "*", schema: "public", table: "profiles", filter: `id=eq.${user.id}` },
         (p) => setProfile(p.new as Profile))
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "attempts", filter: `user_id=eq.${user.id}` },
-        (p) => setAttempts(prev => [p.new as Attempt, ...prev].slice(0, 50)))
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [user]);
