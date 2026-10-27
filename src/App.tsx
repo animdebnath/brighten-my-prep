@@ -11,6 +11,7 @@ import Dashboard from "./pages/Dashboard";
 import Practice from "./pages/Practice";
 import Analytics from "./pages/Analytics";
 import Leaderboard from "./pages/Leaderboard";
+import Mentor from "./pages/Mentor";
 import Assistant from "./pages/Assistant";
 import NotFound from "./pages/NotFound.tsx";
 
@@ -31,6 +32,7 @@ const App = () => (
               <Route path="practice" element={<Practice />} />
               <Route path="analytics" element={<Analytics />} />
               <Route path="leaderboard" element={<Leaderboard />} />
+              <Route path="mentor" element={<Mentor />} />
               <Route path="assistant" element={<Assistant />} />
             </Route>
             <Route path="*" element={<NotFound />} />

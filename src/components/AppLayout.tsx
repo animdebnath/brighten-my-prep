@@ -1,6 +1,6 @@
 import { Navigate, Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { Brain, LayoutDashboard, Swords, BarChart3, MessagesSquare, Trophy, LogOut } from "lucide-react";
+import { Brain, LayoutDashboard, Swords, BarChart3, MessagesSquare, Trophy, LogOut, Compass } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const nav = [
@@ -8,6 +8,7 @@ const nav = [
   { to: "/app/practice", icon: Swords, label: "Practice" },
   { to: "/app/analytics", icon: BarChart3, label: "Analytics" },
   { to: "/app/leaderboard", icon: Trophy, label: "Leaderboard" },
+  { to: "/app/mentor", icon: Compass, label: "Learning Path" },
   { to: "/app/assistant", icon: MessagesSquare, label: "AI Assistant" },
 ];
 
