@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
-import { Flame, Sparkles, Target, TrendingUp, Swords } from "lucide-react";
+import { Flame, Sparkles, Target, TrendingUp, Swords, Award } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
+import { computeBadges } from "@/lib/achievements";
 
 type Profile = { display_name: string; xp: number; streak: number };
 type Attempt = { is_correct: boolean; topic: string; subject: string; created_at: string };
@@ -19,7 +20,7 @@ export default function Dashboard() {
     if (!user) return;
     supabase.from("profiles").select("display_name,xp,streak").eq("id", user.id).maybeSingle()
       .then(({ data }) => data && setProfile(data as Profile));
-    supabase.from("attempts").select("is_correct,topic,subject,created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(50)
+    supabase.from("attempts").select("is_correct,topic,subject,created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(200)
       .then(({ data }) => setAttempts((data as Attempt[]) ?? []));
 
     const ch = supabase.channel("dash-realtime")
@@ -41,16 +42,18 @@ export default function Dashboard() {
   });
 
   // Weak topics
-  const topicMap = new Map<string, { correct: number; total: number }>();
+  const topicMap = new Map<string, { correct: number; total: number; subject: string }>();
   attempts.forEach(a => {
-    const t = topicMap.get(a.topic) ?? { correct: 0, total: 0 };
+    const t = topicMap.get(a.topic) ?? { correct: 0, total: 0, subject: a.subject };
     t.total += 1; if (a.is_correct) t.correct += 1;
     topicMap.set(a.topic, t);
   });
   const weak = [...topicMap.entries()]
     .filter(([, v]) => v.total >= 2)
-    .map(([k, v]) => ({ topic: k, mastery: Math.round((v.correct / v.total) * 100), total: v.total }))
+    .map(([k, v]) => ({ topic: k, subject: v.subject, mastery: Math.round((v.correct / v.total) * 100), total: v.total }))
     .sort((a, b) => a.mastery - b.mastery).slice(0, 5);
+
+  const badges = computeBadges(profile, attempts);
 
   const predicted = Math.min(99, Math.round(accuracy * 0.85 + (profile?.streak ?? 0) * 1.5));
 
@@ -116,17 +119,40 @@ export default function Dashboard() {
           {weak.length === 0 ? (
             <div className="text-sm text-muted-foreground">No weak topics yet. Keep practicing!</div>
           ) : (
-            <ul className="space-y-3">
-              {weak.map(w => (
-                <li key={w.topic}>
-                  <div className="flex justify-between text-sm mb-1"><span className="truncate pr-2">{w.topic}</span><span className="text-muted-foreground">{w.mastery}%</span></div>
-                  <div className="h-2 rounded-full bg-muted overflow-hidden">
-                    <div className="h-full bg-gradient-primary" style={{ width: `${w.mastery}%` }} />
-                  </div>
-                </li>
-              ))}
-            </ul>
+            <>
+              <ul className="space-y-3">
+                {weak.map(w => (
+                  <li key={w.topic}>
+                    <div className="flex justify-between text-sm mb-1"><span className="truncate pr-2">{w.topic}</span><span className="text-muted-foreground">{w.mastery}%</span></div>
+                    <div className="h-2 rounded-full bg-muted overflow-hidden">
+                      <div className="h-full bg-gradient-primary" style={{ width: `${w.mastery}%` }} />
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              <Link to={`/app/practice?subject=${encodeURIComponent(weak[0].subject)}&topic=${encodeURIComponent(weak[0].topic)}`}>
+                <Button size="sm" className="w-full mt-4 bg-gradient-secondary text-secondary-foreground">
+                  <Target className="h-4 w-4 mr-1" /> Fix “{weak[0].topic}”
+                </Button>
+              </Link>
+            </>
           )}
+        </div>
+      </div>
+
+      <div className="glass rounded-2xl p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold flex items-center gap-2"><Award className="h-4 w-4 text-primary" /> Achievements</h3>
+          <span className="text-xs text-muted-foreground">{badges.filter(b => b.unlocked).length}/{badges.length} unlocked</span>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          {badges.map(b => (
+            <div key={b.id} className={`rounded-2xl p-3 border text-center transition-all ${b.unlocked ? "border-primary/40 bg-primary/5 glow-cyan" : "border-border opacity-45"}`}>
+              <div className="text-2xl" aria-hidden>{b.icon}</div>
+              <div className="font-semibold text-sm mt-1">{b.label}</div>
+              <div className="text-[10px] text-muted-foreground mt-0.5">{b.description}</div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
