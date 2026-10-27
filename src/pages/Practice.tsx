@@ -70,11 +70,15 @@ export default function Practice() {
     const elapsed = Date.now() - startedAt.current;
     const isCorrect = option === q.correct_answer;
 
-    // Adaptive difficulty
+    // Adaptive difficulty (explainable)
     if (isCorrect && elapsed < 12000 && confidence[0] >= 3) {
       setDifficulty(d => d === "easy" ? "medium" : d === "medium" ? "hard" : "hard");
+      setNote("Fast, confident and correct — stepping up the difficulty.");
     } else if (!isCorrect || confidence[0] <= 2) {
       setDifficulty(d => d === "hard" ? "medium" : d === "medium" ? "easy" : "easy");
+      setNote("We'll slow down and rebuild this concept before moving on.");
+    } else {
+      setNote("Correct — staying at this level to build consistency.");
     }
 
     const xpDelta = isCorrect ? (difficulty === "hard" ? 30 : difficulty === "medium" ? 20 : 10) : 2;
@@ -138,8 +142,7 @@ export default function Practice() {
               const next = e.target.value;
               setSubject(next);
               recentTopics.current = [];
-              // defer to next tick so state is applied
-              setTimeout(() => fetchQuestion(), 0);
+              fetchQuestion({ subject: next });
             }}
             className="w-full mt-1 h-10 rounded-xl bg-input border border-border px-3 text-sm">
             {SUBJECTS.map(s => <option key={s}>{s}</option>)}
@@ -178,6 +181,10 @@ export default function Practice() {
             className="glass-strong rounded-3xl p-6 md:p-8 space-y-5">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Sparkles className="h-3.5 w-3.5 text-secondary" /> {q.topic}
+            </div>
+            <div className="flex flex-wrap gap-2 text-xs">
+              <span className="px-2.5 py-1 rounded-full bg-primary/10 text-primary">Focus: {q.concept_hint}</span>
+              {note && <span className="px-2.5 py-1 rounded-full bg-muted/60 text-muted-foreground">Why this level: {note}</span>}
             </div>
             <div className="font-display text-xl md:text-2xl font-semibold leading-snug">{q.question}</div>
             <div className="grid sm:grid-cols-2 gap-3">
