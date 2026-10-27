@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -30,11 +31,14 @@ export default function Practice() {
   const recentTopics = useRef<string[]>([]);
   const startedAt = useRef<number>(0);
 
-  const fetchQuestion = async () => {
+  const [note, setNote] = useState<string | null>(null);
+  const fetchQuestion = async (override?: { subject?: string; topic?: string }) => {
+    const s = override?.subject ?? subject;
+    const t = override?.topic ?? topic;
     setLoading(true); setPicked(null); setExplanation(null); setQ(null);
     try {
       const { data, error } = await supabase.functions.invoke("generate-question", {
-        body: { subject, topic, difficulty, recentTopics: recentTopics.current.slice(-5) },
+        body: { subject: s, topic: t, difficulty, recentTopics: recentTopics.current.slice(-5) },
       });
       if (error) throw error;
       if ((data as any).error) throw new Error((data as any).error);
@@ -46,7 +50,19 @@ export default function Practice() {
     } finally { setLoading(false); }
   };
 
-  useEffect(() => { fetchQuestion(); /* eslint-disable-next-line */ }, []);
+  const [searchParams] = useSearchParams();
+  useEffect(() => {
+    const s = searchParams.get("subject");
+    const t = searchParams.get("topic");
+    if (s || t) {
+      if (s) setSubject(s);
+      if (t) setTopic(t);
+      fetchQuestion({ subject: s ?? undefined, topic: t ?? undefined });
+    } else {
+      fetchQuestion();
+    }
+    /* eslint-disable-next-line */
+  }, []);
 
   const submit = async (option: string) => {
     if (!q || picked || !user) return;
